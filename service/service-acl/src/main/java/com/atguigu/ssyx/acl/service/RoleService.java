@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.models.auth.In;
 
 import java.util.List;
+import java.util.Map;
 
 public interface RoleService {
     // 角色分页列表
@@ -21,4 +22,8 @@ public interface RoleService {
     Integer removeById(Long id);
 
     Integer removeByIds(List<Long> idList);
+
+    Map<String, Object> findRoleByUserId(Long adminId);
+
+    void saveUserRoleRelationShip(Long adminId, Long[] roleId);
 }

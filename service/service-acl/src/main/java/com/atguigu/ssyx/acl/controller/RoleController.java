@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.util.List;
 
-@Api("用户管理")
+@Api(tags = "用户管理")
 @RestController
 @RequestMapping("/admin/acl/role")
 @CrossOrigin
@@ -30,20 +30,24 @@ public class RoleController {
         return Result.ok(pageModel);
 
     }
+
     @ApiOperation(value = "获取角色")
     @GetMapping("get/{id}")
     public Result get(@PathVariable Long id) {
         Role role = roleService.getById(id);
-        return Result.ok(role);
+        if (role!= null)
+            return Result.ok(role);
+        else
+            return Result.fail(null);
     }
 
     @ApiOperation(value = "新增角色")
     @PostMapping("save")
     public Result save(@RequestBody Role role) {
-        Integer index  = roleService.save(role);
-        if(index > 0){
+        Integer index = roleService.save(role);
+        if (index > 0) {
             return Result.ok(null);
-        }else {
+        } else {
             return Result.fail(null);
         }
 
@@ -52,21 +56,30 @@ public class RoleController {
     @ApiOperation(value = "修改角色")
     @PutMapping("update")
     public Result updateById(@RequestBody Role role) {
-        roleService.updateById(role);
-        return Result.ok(null);
+        Integer count = roleService.updateById(role);
+        if (count == 1)
+            return Result.ok(null);
+        else
+            return Result.fail(null);
     }
 
     @ApiOperation(value = "删除角色")
     @DeleteMapping("remove/{id}")
     public Result remove(@PathVariable Long id) {
-        roleService.removeById(id);
-        return Result.ok(null);
+        Integer count = roleService.removeById(id);
+        if (count == 1)
+            return Result.ok(null);
+        else
+            return Result.fail(null);
     }
 
     @ApiOperation(value = "根据id列表删除角色")
     @DeleteMapping("batchRemove")
     public Result batchRemove(@RequestBody List<Long> idList) {
-        roleService.removeByIds(idList);
-        return Result.ok(null);
+        Integer count = roleService.removeByIds(idList);
+        if (count > 0)
+            return Result.ok(null);
+        else
+            return Result.fail(null);
     }
 }

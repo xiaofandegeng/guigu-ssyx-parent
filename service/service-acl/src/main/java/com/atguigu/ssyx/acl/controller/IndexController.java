@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
-@Api("登录接口")
+@Api(tags = "登录接口")
 @RestController
 @RequestMapping("/admin/acl/index")
 @CrossOrigin     //跨域
