@@ -26,4 +26,6 @@ public interface SkuInfoService {
     void publish(Long skuId, Integer status);
 
     void isNewPerson(Long skuId, Integer status);
+
+    SkuInfo getById(Long skuId);
 }

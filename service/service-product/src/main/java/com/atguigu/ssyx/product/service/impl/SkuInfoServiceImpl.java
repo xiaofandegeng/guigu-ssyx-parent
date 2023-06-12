@@ -1,5 +1,7 @@
 package com.atguigu.ssyx.product.service.impl;
 
+import com.atguigu.ssyx.common.constant.MqConst;
+import com.atguigu.ssyx.common.service.RabbitService;
 import com.atguigu.ssyx.model.product.SkuAttrValue;
 import com.atguigu.ssyx.model.product.SkuImage;
 import com.atguigu.ssyx.model.product.SkuInfo;
@@ -15,6 +17,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -36,6 +39,9 @@ public class SkuInfoServiceImpl implements SkuInfoService {
 
     @Resource
     private SkuAttrValueMapper skuAttrValueMapper;
+
+    @Autowired
+    private RabbitService rabbitService;
 
     @Override
     public IPage<SkuInfo> selectPage(Page<SkuInfo> pageParam, SkuInfoQueryVo skuInfoQueryVo) {
@@ -187,13 +193,17 @@ public class SkuInfoServiceImpl implements SkuInfoService {
             skuInfoUp.setId(skuId);
             skuInfoUp.setPublishStatus(1);
             skuInfoMapper.updateById(skuInfoUp);
-            //TODO 商品上架 后续会完善：发送mq消息更新es数据
+
+            //商品上架：发送mq消息同步es
+            rabbitService.sendMessage(MqConst.EXCHANGE_GOODS_DIRECT, MqConst.ROUTING_GOODS_UPPER, skuId);
         } else {
             SkuInfo skuInfoUp = new SkuInfo();
             skuInfoUp.setId(skuId);
             skuInfoUp.setPublishStatus(0);
             skuInfoMapper.updateById(skuInfoUp);
-            //TODO 商品下架 后续会完善：发送mq消息更新es数据
+
+            //商品下架：发送mq消息同步es
+            rabbitService.sendMessage(MqConst.EXCHANGE_GOODS_DIRECT, MqConst.ROUTING_GOODS_LOWER, skuId);
         }
     }
 
@@ -204,6 +214,11 @@ public class SkuInfoServiceImpl implements SkuInfoService {
         skuInfoUp.setId(skuId);
         skuInfoUp.setIsNewPerson(status);
         skuInfoMapper.updateById(skuInfoUp);
+    }
+
+    @Override
+    public SkuInfo getById(Long skuId) {
+        return skuInfoMapper.selectById(skuId);
     }
 
     private SkuInfoVo getSkuInfoDB(Long skuId) {
